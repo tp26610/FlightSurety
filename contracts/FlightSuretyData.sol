@@ -11,6 +11,7 @@ contract FlightSuretyData {
 
     address private contractOwner; // Account used to deploy contract
     bool private operational = true; // Blocks all state changes throughout the contract if false
+    mapping(address => uint256) private authorizedCallers;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -49,6 +50,11 @@ contract FlightSuretyData {
         _;
     }
 
+    modifier requireCallerAuthorized() {
+      require(authorizedCallers[msg.sender] == 1, "Caller is not authorized");
+      _;
+    }
+
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -80,7 +86,7 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline() external pure {}
+    function registerAirline() external requireCallerAuthorized {}
 
     /**
      * @dev Buy insurance for a flight
@@ -112,6 +118,14 @@ contract FlightSuretyData {
         uint256 timestamp
     ) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(airline, flight, timestamp));
+    }
+
+    function authorizeCaller(address caller) external requireContractOwner {
+      authorizedCallers[caller] = 1;
+    }
+
+    function deauthorizeContract(address caller) external requireContractOwner {
+      delete authorizedCallers[caller];
     }
 
     /**
