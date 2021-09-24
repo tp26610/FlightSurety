@@ -124,7 +124,7 @@ contract FlightSuretyData {
       authorizedCallers[caller] = 1;
     }
 
-    function deauthorizeContract(address caller) external requireContractOwner {
+    function deauthorizeCaller(address caller) external requireContractOwner {
       delete authorizedCallers[caller];
     }
 
