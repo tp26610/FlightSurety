@@ -97,7 +97,15 @@ contract FlightSuretyData {
         airlines[account] = Airline({isRegistered: true, isOperational: false});
     }
 
-    function isAirlineOperational(address account) external view returns (bool) {
+    function isAirlineRegistered(address account) external view returns (bool) {
+        return airlines[account].isRegistered;
+    }
+
+    function isAirlineOperational(address account)
+        external
+        view
+        returns (bool)
+    {
         return airlines[account].isOperational;
     }
 
@@ -124,16 +132,16 @@ contract FlightSuretyData {
      *
      */
     function fund(address account, uint256 amount) external payable {
-      // TODO: transfer amount to data contract
+        // TODO: transfer amount to data contract
 
-      funds[account] = funds[account] + amount;
-      if (funds[account] >= 10 ether) {
-        airlines[account].isOperational = true;
-      }
+        funds[account] = funds[account] + amount;
+        if (funds[account] >= 10 ether) {
+            airlines[account].isOperational = true;
+        }
     }
 
-    function getAirlineFund(address account) external view returns(uint256) {
-      return funds[account];
+    function getAirlineFund(address account) external view returns (uint256) {
+        return funds[account];
     }
 
     function getFlightKey(

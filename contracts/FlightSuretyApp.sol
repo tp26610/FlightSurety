@@ -97,6 +97,10 @@ contract FlightSuretyApp {
         returns (bool success, uint256 votes)
     {
         require(
+            !flightSuretyData.isAirlineRegistered(account),
+            "the airline is registered"
+        );
+        require(
             flightSuretyData.isAirlineOperational(msg.sender),
             "the caller is not operational airline"
         );
@@ -320,7 +324,9 @@ contract FlightSuretyApp {
 contract FlightSuretyData {
     function registerAirline(address account) external;
 
-    function isAirlineOperational(address account) external returns (bool);
+    function isAirlineOperational(address account) external view returns (bool);
+
+    function isAirlineRegistered(address account) external view returns (bool);
 
     function fund(address account, uint256 amount) external payable;
 }

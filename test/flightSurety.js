@@ -95,7 +95,10 @@ contract('Flight Surety Tests', async (accounts) => {
 
     // given the default airline is funded
     const tenEtherInWei = web3.utils.toWei('10', 'ether');
-    await config.flightSuretyApp.fundAirline(existingAirline, { from: existingAirline, value: tenEtherInWei})
+    await config.flightSuretyApp.fundAirline(existingAirline, {
+      from: existingAirline,
+      value: tenEtherInWei,
+    });
 
     // WHEN
     await config.flightSuretyApp.registerAirline(newAirline, {
@@ -104,17 +107,32 @@ contract('Flight Surety Tests', async (accounts) => {
 
     // THEN
     const result = await config.flightSuretyData.isAirline.call(newAirline);
-    assert.equal(result, true, "New airline is not registered.");
+    assert.equal(result, true, 'New airline is not registered.');
   });
 
-  // TODO:
-  xit('(airline) should register failed while the caller is not airline', async () => {
+  it('(airline) should register failed while the caller is existing airline', async () => {
+    // GIVEN
+    const existingAirline = config.owner;
+    let isReverted = false;
 
+    // given the default airline is funded
+    const tenEtherInWei = web3.utils.toWei('10', 'ether');
+    await config.flightSuretyApp.fundAirline(existingAirline, {
+      from: existingAirline,
+      value: tenEtherInWei,
+    });
+
+    // WHEN
+    try {
+      await config.flightSuretyApp.registerAirline(existingAirline, {
+        from: existingAirline,
+      });
+    } catch (e) {
+      // console.log(e);
+      isReverted = true;
+    }
+
+    // ASSERT
+    assert.equal(isReverted, true, 'the contract is not reverted');
   });
-
-  // TODO: 
-  xit('(airline) should register failed while the caller is existing airline', async () => {
-
-  });
-
 });
