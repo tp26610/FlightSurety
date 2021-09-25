@@ -91,12 +91,26 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline()
+    function registerAirline(address account)
         external
-        pure
+        requireIsOperational
         returns (bool success, uint256 votes)
     {
+        require(
+            flightSuretyData.isAirlineOperational(msg.sender),
+            "the caller is not operational airline"
+        );
+        flightSuretyData.registerAirline(account);
         return (success, 0);
+    }
+
+    function fundAirline(address airline) external payable {
+        uint256 amount = msg.value;
+
+        // pay to app contract
+        // msg.sender.transfer(msg.value);
+
+        flightSuretyData.fund(airline, amount);
     }
 
     /**
@@ -304,6 +318,9 @@ contract FlightSuretyApp {
 
 // interface
 contract FlightSuretyData {
-  function registerAirline(address account) external;
-}
+    function registerAirline(address account) external;
 
+    function isAirlineOperational(address account) external returns (bool);
+
+    function fund(address account, uint256 amount) external payable;
+}

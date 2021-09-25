@@ -87,4 +87,34 @@ contract('Flight Surety Tests', async (accounts) => {
     let result = await config.flightSuretyData.isAirline.call(config.owner);
     assert.equal(result, true, 'Deployed owner address should be airline');
   });
+
+  it('(airline) should be registered by existing airline while there is one airline', async () => {
+    // GIVEN
+    const existingAirline = config.owner;
+    const newAirline = accounts[2];
+
+    // given the default airline is funded
+    const tenEtherInWei = web3.utils.toWei('10', 'ether');
+    await config.flightSuretyApp.fundAirline(existingAirline, { from: existingAirline, value: tenEtherInWei})
+
+    // WHEN
+    await config.flightSuretyApp.registerAirline(newAirline, {
+      from: existingAirline,
+    });
+
+    // THEN
+    const result = await config.flightSuretyData.isAirline.call(newAirline);
+    assert.equal(result, true, "New airline is not registered.");
+  });
+
+  // TODO:
+  xit('(airline) should register failed while the caller is not airline', async () => {
+
+  });
+
+  // TODO: 
+  xit('(airline) should register failed while the caller is existing airline', async () => {
+
+  });
+
 });

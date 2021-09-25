@@ -18,6 +18,7 @@ contract FlightSuretyData {
     bool private operational = true; // Blocks all state changes throughout the contract if false
     mapping(address => uint256) private authorizedCallers;
     mapping(address => Airline) private airlines;
+    mapping(address => uint256) private funds;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -96,6 +97,10 @@ contract FlightSuretyData {
         airlines[account] = Airline({isRegistered: true, isOperational: false});
     }
 
+    function isAirlineOperational(address account) external view returns (bool) {
+        return airlines[account].isOperational;
+    }
+
     /**
      * @dev Buy insurance for a flight
      *
@@ -118,7 +123,18 @@ contract FlightSuretyData {
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fund() public payable {}
+    function fund(address account, uint256 amount) external payable {
+      // TODO: transfer amount to data contract
+
+      funds[account] = funds[account] + amount;
+      if (funds[account] >= 10 ether) {
+        airlines[account].isOperational = true;
+      }
+    }
+
+    function getAirlineFund(address account) external view returns(uint256) {
+      return funds[account];
+    }
 
     function getFlightKey(
         address airline,
@@ -138,13 +154,5 @@ contract FlightSuretyData {
 
     function isAirline(address account) external view returns (bool) {
         return airlines[account].isRegistered;
-    }
-
-    /**
-     * @dev Fallback function for funding smart contract.
-     *
-     */
-    function() external payable {
-        fund();
     }
 }
