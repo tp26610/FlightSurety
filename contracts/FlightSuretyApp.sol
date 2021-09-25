@@ -72,6 +72,7 @@ contract FlightSuretyApp {
     constructor(address dataContract) public {
         contractOwner = msg.sender;
         flightSuretyData = FlightSuretyData(dataContract);
+        flightSuretyData.registerAirline(msg.sender);
     }
 
     /********************************************************************************************/
@@ -303,6 +304,6 @@ contract FlightSuretyApp {
 
 // interface
 contract FlightSuretyData {
-
+  function registerAirline(address account) external;
 }
 

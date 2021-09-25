@@ -9,9 +9,15 @@ contract FlightSuretyData {
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
 
+    struct Airline {
+        bool isRegistered;
+        bool isOperational;
+    }
+
     address private contractOwner; // Account used to deploy contract
     bool private operational = true; // Blocks all state changes throughout the contract if false
     mapping(address => uint256) private authorizedCallers;
+    mapping(address => Airline) private airlines;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -51,8 +57,8 @@ contract FlightSuretyData {
     }
 
     modifier requireCallerAuthorized() {
-      require(authorizedCallers[msg.sender] == 1, "Caller is not authorized");
-      _;
+        require(authorizedCallers[msg.sender] == 1, "Caller is not authorized");
+        _;
     }
 
     /********************************************************************************************/
@@ -86,7 +92,9 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline() external requireCallerAuthorized {}
+    function registerAirline(address account) external requireIsOperational {
+        airlines[account] = Airline({isRegistered: true, isOperational: false});
+    }
 
     /**
      * @dev Buy insurance for a flight
@@ -121,16 +129,15 @@ contract FlightSuretyData {
     }
 
     function authorizeCaller(address caller) external requireContractOwner {
-      authorizedCallers[caller] = 1;
+        authorizedCallers[caller] = 1;
     }
 
     function deauthorizeCaller(address caller) external requireContractOwner {
-      delete authorizedCallers[caller];
+        delete authorizedCallers[caller];
     }
 
-    // TODO:
-    function isAirline(address addr) external view returns(bool) {
-      return false;
+    function isAirline(address account) external view returns (bool) {
+        return airlines[account].isRegistered;
     }
 
     /**

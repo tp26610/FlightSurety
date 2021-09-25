@@ -82,4 +82,9 @@ contract('Flight Surety Tests', async (accounts) => {
       "Airline should not be able to register another airline if it hasn't provided funding"
     );
   });
+
+  it('(airline) should be registered while contract deployed', async () => {
+    let result = await config.flightSuretyData.isAirline.call(config.owner);
+    assert.equal(result, true, 'Deployed owner address should be airline');
+  });
 });
