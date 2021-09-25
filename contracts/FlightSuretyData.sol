@@ -128,6 +128,11 @@ contract FlightSuretyData {
       delete authorizedCallers[caller];
     }
 
+    // TODO:
+    function isAirline(address addr) external view returns(bool) {
+      return false;
+    }
+
     /**
      * @dev Fallback function for funding smart contract.
      *
