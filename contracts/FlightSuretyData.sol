@@ -158,6 +158,7 @@ contract FlightSuretyData {
 
     function getAirlineVoteCount(address airlineAddr)
         external
+        view
         returns (uint256)
     {
         Airline memory airline = airlines[airlineAddr];
