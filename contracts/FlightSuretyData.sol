@@ -188,7 +188,7 @@ contract FlightSuretyData {
      *
      */
     function fund(address account, uint256 amount) external payable {
-        // TODO: transfer amount to data contract
+        msg.sender.transfer(msg.value);
 
         funds[account] = funds[account] + amount;
         if (funds[account] >= 10 ether) {

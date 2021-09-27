@@ -130,7 +130,7 @@ contract FlightSuretyApp {
         uint256 amount = msg.value;
 
         // pay to app contract
-        // msg.sender.transfer(msg.value);
+        msg.sender.transfer(msg.value);
 
         flightSuretyData.fund(airline, amount);
     }
