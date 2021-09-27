@@ -10,8 +10,10 @@ contract FlightSuretyData {
     /********************************************************************************************/
 
     struct Airline {
+        address addr;
         bool isRegistered;
         bool isOperational;
+        address[] voters;
     }
 
     address private contractOwner; // Account used to deploy contract
@@ -19,6 +21,7 @@ contract FlightSuretyData {
     mapping(address => uint256) private authorizedCallers;
     mapping(address => Airline) private airlines;
     mapping(address => uint256) private funds;
+    address[] airlineAddrs;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -94,7 +97,13 @@ contract FlightSuretyData {
      *
      */
     function registerAirline(address account) external requireIsOperational {
-        airlines[account] = Airline({isRegistered: true, isOperational: false});
+        airlines[account] = Airline({
+            addr: account,
+            isRegistered: true,
+            isOperational: false,
+            voters: new address[](0)
+        });
+        airlineAddrs.push(account);
     }
 
     function isAirlineRegistered(address account) external view returns (bool) {
@@ -107,6 +116,53 @@ contract FlightSuretyData {
         returns (bool)
     {
         return airlines[account].isOperational;
+    }
+
+    function getOperationalArilineCount() external view returns (uint256) {
+        uint256 count = 0;
+        for (uint256 i = 0; i < airlineAddrs.length; i++) {
+            address airlineAddr = airlineAddrs[i];
+            if (airlines[airlineAddr].isOperational) {
+                count = count.add(1);
+            }
+        }
+        return count;
+    }
+
+    function voteAirline(address voter, address airlineAddr) external {
+        Airline storage airline = airlines[airlineAddr];
+        if (airline.addr == address(0)) {
+            airlines[airlineAddr] = Airline({
+                addr: airlineAddr,
+                isRegistered: false,
+                isOperational: false,
+                voters: new address[](0)
+            });
+            airline = airlines[airlineAddr];
+        }
+
+        address[] memory voters = airline.voters;
+
+        bool isVoted = false;
+        for (uint256 i = 0; i < voters.length; i++) {
+            address votedAddr = voters[i];
+            if (votedAddr == airlineAddr) {
+                isVoted = true;
+                break;
+            }
+        }
+        require(isVoted == false, "The voter is voted");
+
+        airline.voters.push(voter);
+    }
+
+    function getAirlineVoteCount(address airlineAddr)
+        external
+        returns (uint256)
+    {
+        Airline memory airline = airlines[airlineAddr];
+        address[] memory voters = airline.voters;
+        return voters.length;
     }
 
     /**

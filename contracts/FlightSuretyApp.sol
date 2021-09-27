@@ -17,6 +17,8 @@ contract FlightSuretyApp {
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
 
+    uint256 constant AIRLINE_CONSENSUS_AMOUNT = 4;
+
     // Flight status codees
     uint8 private constant STATUS_CODE_UNKNOWN = 0;
     uint8 private constant STATUS_CODE_ON_TIME = 10;
@@ -104,8 +106,24 @@ contract FlightSuretyApp {
             flightSuretyData.isAirlineOperational(msg.sender),
             "the caller is not operational airline"
         );
-        flightSuretyData.registerAirline(account);
-        return (success, 0);
+
+        uint256 operationalAirlineCount = flightSuretyData
+            .getOperationalArilineCount();
+        if (operationalAirlineCount < AIRLINE_CONSENSUS_AMOUNT) {
+            flightSuretyData.registerAirline(account);
+            return (true, 0);
+        }
+
+        uint256 registeredThreshold = operationalAirlineCount /
+            2 +
+            (operationalAirlineCount % 2);
+        flightSuretyData.voteAirline(msg.sender, account);
+        uint256 voteCount = flightSuretyData.getAirlineVoteCount(account);
+        if (voteCount >= registeredThreshold) {
+            flightSuretyData.registerAirline(account);
+            return (true, voteCount);
+        }
+        return (false, voteCount);
     }
 
     function fundAirline(address airline) external payable {
@@ -329,4 +347,12 @@ contract FlightSuretyData {
     function isAirlineRegistered(address account) external view returns (bool);
 
     function fund(address account, uint256 amount) external payable;
+
+    function getOperationalArilineCount() external view returns (uint256);
+
+    function voteAirline(address voter, address airlineAddr) external;
+
+    function getAirlineVoteCount(address airlineAddr)
+        external
+        returns (uint256);
 }

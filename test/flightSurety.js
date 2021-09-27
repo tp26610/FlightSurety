@@ -3,7 +3,7 @@ var BigNumber = require('bignumber.js');
 
 contract('Flight Surety Tests', async (accounts) => {
   var config;
-  before('setup contract', async () => {
+  beforeEach('setup contract', async () => {
     config = await Test.Config(accounts);
     await config.flightSuretyData.authorizeCaller(
       config.flightSuretyApp.address
@@ -134,5 +134,57 @@ contract('Flight Surety Tests', async (accounts) => {
 
     // ASSERT
     assert.equal(isReverted, true, 'the contract is not reverted');
+  });
+
+  it('(airline) should not be registered while not reaching consensus of 50% of registered airlines', async () => {
+    const owner = config.owner;
+    const secondToFourthAirlines = accounts.slice(1, 4);
+    const fifthAirline = accounts[4];
+    const tenEtherInWei = web3.utils.toWei('10', 'ether');
+
+    // console.log('>> owner=', owner);
+    // console.log('>> secondToFourthAirlines=', secondToFourthAirlines);
+    // console.log('>> fifthAirline=', fifthAirline);
+
+    // Given: 4 funded airlines
+    await config.flightSuretyApp.fundAirline(owner, {
+      from: owner,
+      value: tenEtherInWei,
+    });
+
+    // console.log('>> owner airline funded');
+
+    for (let i = 0; i < secondToFourthAirlines.length; i++) {
+      const airline = secondToFourthAirlines[i];
+      // console.log(`>> airline ${airline} registering`);
+      await config.flightSuretyApp.registerAirline(airline, {
+        from: owner,
+      });
+      // console.log(`>> airline ${airline} registered`);
+      await config.flightSuretyApp.fundAirline(airline, {
+        from: owner,
+        value: tenEtherInWei,
+      });
+      // console.log(`>> airline ${airline} funded`);
+    }
+
+    // console.log('>> 3 airlines funded');
+
+    // When
+    await config.flightSuretyApp.registerAirline(fifthAirline, {
+      from: owner,
+    });
+
+    // console.log('>> fifth airline registered');
+
+    // Then
+    const isRegistered = await config.flightSuretyData.isAirlineRegistered.call(
+      fifthAirline
+    );
+    assert.equal(
+      isRegistered,
+      false,
+      'The fifth airline should not be registered'
+    );
   });
 });
