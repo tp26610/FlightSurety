@@ -217,6 +217,6 @@ contract FlightSuretyData {
     }
 
     function isAirline(address account) external view returns (bool) {
-        return airlines[account].isRegistered;
+        return airlines[account].addr != address(0);
     }
 }

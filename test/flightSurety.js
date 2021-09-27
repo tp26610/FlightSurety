@@ -136,15 +136,8 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(isReverted, true, 'the contract is not reverted');
   });
 
-  it('(airline) should not be registered while not reaching consensus of 50% of registered airlines', async () => {
-    const owner = config.owner;
-    const secondToFourthAirlines = accounts.slice(1, 4);
-    const fifthAirline = accounts[4];
+  async function givenFourAirlinesFunded(owner, secondToFourthAirlines, ) {
     const tenEtherInWei = web3.utils.toWei('10', 'ether');
-
-    // console.log('>> owner=', owner);
-    // console.log('>> secondToFourthAirlines=', secondToFourthAirlines);
-    // console.log('>> fifthAirline=', fifthAirline);
 
     // Given: 4 funded airlines
     await config.flightSuretyApp.fundAirline(owner, {
@@ -169,15 +162,29 @@ contract('Flight Surety Tests', async (accounts) => {
     }
 
     // console.log('>> 3 airlines funded');
+  }
 
-    // When
+  it('(airline) should not be registered while not reaching consensus of 50% of registered airlines', async () => {
+    // Given 4 funded airlines
+    const owner = config.owner;
+    const secondToFourthAirlines = accounts.slice(1, 4);
+    await givenFourAirlinesFunded(owner, secondToFourthAirlines);
+
+    // Given fifth airline
+    const fifthAirline = accounts[4];
+
+    // When fifth airline is registering
     await config.flightSuretyApp.registerAirline(fifthAirline, {
       from: owner,
     });
 
     // console.log('>> fifth airline registered');
 
-    // Then
+    // Then fifth airline is airline
+    const isAirline = await config.flightSuretyData.isAirline(fifthAirline);
+    assert.equal(isAirline, true, 'The fifth airline is not added');
+
+    // Then fifth airline is nor registered
     const isRegistered = await config.flightSuretyData.isAirlineRegistered.call(
       fifthAirline
     );
