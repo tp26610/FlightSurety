@@ -2,7 +2,6 @@ var Test = require('../config/testConfig.js');
 var BigNumber = require('bignumber.js');
 
 contract('Flight Surety Tests', async (accounts) => {
-
   var config;
   beforeEach('setup contract', async () => {
     config = await Test.Config(accounts);
@@ -10,6 +9,14 @@ contract('Flight Surety Tests', async (accounts) => {
       config.flightSuretyApp.address
     );
   });
+
+  async function givenAirlineFunded(airline) {
+    const tenEtherInWei = web3.utils.toWei('10', 'ether');
+    await config.flightSuretyApp.fundAirline(airline, {
+      from: airline,
+      value: tenEtherInWei,
+    });
+  }
 
   async function givenFourAirlinesFunded(owner, secondToFourthAirlines) {
     const tenEtherInWei = web3.utils.toWei('10', 'ether');
@@ -123,13 +130,7 @@ contract('Flight Surety Tests', async (accounts) => {
     // GIVEN
     const existingAirline = config.owner;
     const newAirline = accounts[2];
-
-    // given the default airline is funded
-    const tenEtherInWei = web3.utils.toWei('10', 'ether');
-    await config.flightSuretyApp.fundAirline(existingAirline, {
-      from: existingAirline,
-      value: tenEtherInWei,
-    });
+    await givenAirlineFunded(existingAirline);
 
     // WHEN
     await config.flightSuretyApp.registerAirline(newAirline, {
