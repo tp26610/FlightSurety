@@ -127,7 +127,6 @@ contract FlightSuretyApp {
     }
 
     function fundAirline(address airline) external payable {
-        uint256 amount = msg.value;
         flightSuretyData.fund.value(msg.value)(airline);
     }
 
