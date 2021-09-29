@@ -188,10 +188,8 @@ contract FlightSuretyData {
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fund(address account, uint256 amount) external payable {
-        msg.sender.transfer(msg.value);
-
-        funds[account] = funds[account] + amount;
+    function fund(address account) external payable {
+        funds[account] = funds[account] + msg.value;
         if (funds[account] >= 10 ether) {
             airlines[account].isOperational = true;
         }
@@ -220,4 +218,17 @@ contract FlightSuretyData {
     function isAirline(address account) external view returns (bool) {
         return airlines[account].addr != address(0);
     }
+
+    /**
+     * @dev Fallback function for funding smart contract.
+     *
+     */
+    /*
+    function()
+                            external
+                            payable
+    {
+        fund();
+    }
+    */
 }

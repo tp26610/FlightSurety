@@ -128,11 +128,7 @@ contract FlightSuretyApp {
 
     function fundAirline(address airline) external payable {
         uint256 amount = msg.value;
-
-        // pay to app contract
-        msg.sender.transfer(msg.value);
-
-        flightSuretyData.fund(airline, amount);
+        flightSuretyData.fund.value(msg.value)(airline);
     }
 
     /**
@@ -346,7 +342,7 @@ contract FlightSuretyData {
 
     function isAirlineRegistered(address account) external view returns (bool);
 
-    function fund(address account, uint256 amount) external payable;
+    function fund(address account) external payable;
 
     function getOperationalArilineCount() external view returns (uint256);
 

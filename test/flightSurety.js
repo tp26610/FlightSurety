@@ -2,6 +2,7 @@ var Test = require('../config/testConfig.js');
 var BigNumber = require('bignumber.js');
 
 contract('Flight Surety Tests', async (accounts) => {
+
   var config;
   beforeEach('setup contract', async () => {
     config = await Test.Config(accounts);
@@ -9,6 +10,36 @@ contract('Flight Surety Tests', async (accounts) => {
       config.flightSuretyApp.address
     );
   });
+
+  async function givenFourAirlinesFunded(owner, secondToFourthAirlines) {
+    const tenEtherInWei = web3.utils.toWei('10', 'ether');
+
+    // console.log('>> fundAirline owner airline');
+
+    // Given: 4 funded airlines
+    await config.flightSuretyApp.fundAirline(owner, {
+      from: owner,
+      value: tenEtherInWei,
+    });
+
+    // console.log('>> owner airline funded');
+
+    for (let i = 0; i < secondToFourthAirlines.length; i++) {
+      const airline = secondToFourthAirlines[i];
+      // console.log(`>> airline ${airline} registering`);
+      await config.flightSuretyApp.registerAirline(airline, {
+        from: owner,
+      });
+      // console.log(`>> airline ${airline} registered`);
+      await config.flightSuretyApp.fundAirline(airline, {
+        from: owner,
+        value: tenEtherInWei,
+      });
+      // console.log(`>> airline ${airline} funded`);
+    }
+
+    // console.log('>> 3 airlines funded');
+  }
 
   /****************************************************************************************/
   /* Operations and Settings                                                              */
@@ -136,34 +167,6 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(isReverted, true, 'the contract is not reverted');
   });
 
-  async function givenFourAirlinesFunded(owner, secondToFourthAirlines) {
-    const tenEtherInWei = web3.utils.toWei('10', 'ether');
-
-    // Given: 4 funded airlines
-    await config.flightSuretyApp.fundAirline(owner, {
-      from: owner,
-      value: tenEtherInWei,
-    });
-
-    // console.log('>> owner airline funded');
-
-    for (let i = 0; i < secondToFourthAirlines.length; i++) {
-      const airline = secondToFourthAirlines[i];
-      // console.log(`>> airline ${airline} registering`);
-      await config.flightSuretyApp.registerAirline(airline, {
-        from: owner,
-      });
-      // console.log(`>> airline ${airline} registered`);
-      await config.flightSuretyApp.fundAirline(airline, {
-        from: owner,
-        value: tenEtherInWei,
-      });
-      // console.log(`>> airline ${airline} funded`);
-    }
-
-    // console.log('>> 3 airlines funded');
-  }
-
   it('(airline) should not be registered while not reaching consensus of 50% of registered airlines', async () => {
     // Given 4 funded airlines
     const owner = config.owner;
@@ -220,4 +223,8 @@ contract('Flight Surety Tests', async (accounts) => {
     );
     assert.equal(isRegistered, true, 'The fifth airline should be registered');
   });
+
+  xit('(insurance) can be paid for purchasing by user with 0.9 ether', () => {});
+  xit('(insurance) cannot be paid for purchasing by user with 1.9 ether', () => {});
+  xit('(insurance) cannot be paid for purchasing if the airline is not operational', () => {});
 });
