@@ -19,23 +19,7 @@ contract FlightSuretyApp {
 
     uint256 constant AIRLINE_CONSENSUS_AMOUNT = 4;
 
-    // Flight status codees
-    uint8 private constant STATUS_CODE_UNKNOWN = 0;
-    uint8 private constant STATUS_CODE_ON_TIME = 10;
-    uint8 private constant STATUS_CODE_LATE_AIRLINE = 20;
-    uint8 private constant STATUS_CODE_LATE_WEATHER = 30;
-    uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
-    uint8 private constant STATUS_CODE_LATE_OTHER = 50;
-
     address private contractOwner; // Account used to deploy contract
-
-    struct Flight {
-        bool isRegistered;
-        uint8 statusCode;
-        uint256 updatedTimestamp;
-        address airline;
-    }
-    mapping(bytes32 => Flight) private flights;
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -134,7 +118,34 @@ contract FlightSuretyApp {
      * @dev Register a future flight for insuring.
      *
      */
-    function registerFlight() external pure {}
+    function registerFlight(
+        string flight,
+        string from,
+        string to,
+        uint256 timestamp
+    ) external {
+        flightSuretyData.registerFlight(
+            msg.sender,
+            flight,
+            from,
+            to,
+            timestamp
+        );
+    }
+
+    function buyInsurance(
+        address airline,
+        string flight,
+        uint256 timestamp
+    ) external payable {
+        flightSuretyData.buy.value(msg.value)(
+            airline,
+            flight,
+            timestamp,
+            msg.sender,
+            msg.value
+        );
+    }
 
     /**
      * @dev Called after oracle has updated flight status
@@ -350,4 +361,20 @@ contract FlightSuretyData {
     function getAirlineVoteCount(address airlineAddr)
         external
         returns (uint256);
+
+    function registerFlight(
+        address airline,
+        string flight,
+        string from,
+        string to,
+        uint256 timestamp
+    ) external;
+
+    function buy(
+        address airline,
+        string flight,
+        uint256 timestamp,
+        address passenger,
+        uint256 amount
+    ) external payable;
 }

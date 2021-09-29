@@ -15,13 +15,42 @@ contract FlightSuretyData {
         bool isOperational;
         address[] voters;
     }
+    mapping(address => Airline) private airlines;
 
     address private contractOwner; // Account used to deploy contract
     bool private operational = true; // Blocks all state changes throughout the contract if false
     mapping(address => uint256) private authorizedCallers;
-    mapping(address => Airline) private airlines;
     mapping(address => uint256) private funds;
     address[] airlineAddrs;
+
+    // Flights
+    // Flight status codees
+    uint8 private constant STATUS_CODE_UNKNOWN = 0;
+    uint8 private constant STATUS_CODE_ON_TIME = 10;
+    uint8 private constant STATUS_CODE_LATE_AIRLINE = 20;
+    uint8 private constant STATUS_CODE_LATE_WEATHER = 30;
+    uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
+    uint8 private constant STATUS_CODE_LATE_OTHER = 50;
+
+    struct Flight {
+        bool isRegistered;
+        uint8 statusCode;
+        uint256 updatedTimestamp;
+        address airline;
+        string flight;
+        string from;
+        string to;
+    }
+    mapping(bytes32 => Flight) private flights;
+
+    // Insurances
+    struct Insurance {
+        address passenger;
+        uint256 amount; // Passenger insurance payment
+        bool isCredited;
+    }
+    mapping(bytes32 => Insurance[]) insurancesPerFlight;
+    mapping(address => uint256) public pendingPayments;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -166,11 +195,66 @@ contract FlightSuretyData {
         return voters.length;
     }
 
+    function isInsured(
+        address passenger,
+        address airline,
+        string flight,
+        uint256 timestamp
+    ) external view returns (bool) {
+        Insurance[] memory insuredPassengers = insurancesPerFlight[
+            getFlightKey(airline, flight, timestamp)
+        ];
+        for (uint256 i = 0; i < insuredPassengers.length; i++) {
+            if (insuredPassengers[i].passenger == passenger) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function registerFlight(
+        address airline,
+        string flight,
+        string from,
+        string to,
+        uint256 timestamp
+    ) external {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        require(!flights[flightKey].isRegistered, "Flight already registered");
+
+        flights[flightKey] = Flight({
+            isRegistered: true,
+            statusCode: 0,
+            updatedTimestamp: timestamp,
+            airline: airline,
+            flight: flight,
+            from: from,
+            to: to
+        });
+    }
+
     /**
      * @dev Buy insurance for a flight
      *
      */
-    function buy() external payable {}
+    function buy(
+        address airline,
+        string flight,
+        uint256 timestamp,
+        address passenger,
+        uint256 amount
+    ) external payable {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        require(flights[flightKey].isRegistered, "Flight is not registered");
+
+        insurancesPerFlight[flightKey].push(
+            Insurance({
+                passenger: passenger,
+                amount: amount,
+                isCredited: false
+            })
+        );
+    }
 
     /**
      *  @dev Credits payouts to insurees
