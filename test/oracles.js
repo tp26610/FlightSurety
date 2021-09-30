@@ -39,9 +39,10 @@ contract('Oracles', async (accounts) => {
       let result = await config.flightSuretyApp.getMyIndexes.call({
         from: accounts[a],
       });
-      console.log(
-        `Oracle Registered: ${result[0]}, ${result[1]}, ${result[2]}`
-      );
+      // Enable this when debugging
+      // console.log(
+      //   `Oracle Registered: ${result[0]}, ${result[1]}, ${result[2]}`
+      // );
     }
   });
 
@@ -67,6 +68,8 @@ contract('Oracles', async (accounts) => {
       let oracleIndexes = await config.flightSuretyApp.getMyIndexes.call({
         from: accounts[a],
       });
+      // Enable this when debugging
+      // console.log(`a=${a} oracleIndexes=${oracleIndexes}`);
       for (let idx = 0; idx < 3; idx++) {
         try {
           // Submit a response...it will only be accepted if there is an Index match
@@ -78,16 +81,12 @@ contract('Oracles', async (accounts) => {
             STATUS_CODE_ON_TIME,
             { from: accounts[a] }
           );
+
+          // Enable this when debugging
+          // console.log(`Success a=${a} idx=${idx} oracleIndexes=[${idx}]=${oracleIndexes[idx].toNumber()}, flight=${flight} timestamp=${timestamp}`)
         } catch (e) {
           // Enable this when debugging
-          console.log(
-            '\nError',
-            idx,
-            oracleIndexes[idx].toNumber(),
-            flight,
-            timestamp
-          );
-          console.error(e);
+          // console.log(`Error a=${a} idx=${idx} oracleIndexes=[${idx}]=${oracleIndexes[idx].toNumber()}, flight=${flight} timestamp=${timestamp}`)
         }
       }
     }
