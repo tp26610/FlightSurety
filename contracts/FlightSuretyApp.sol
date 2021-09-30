@@ -138,6 +138,10 @@ contract FlightSuretyApp {
         string flight,
         uint256 timestamp
     ) external payable {
+        require(
+            msg.value <= 1 ether,
+            "User cannot buy insurance above 1 ether"
+        );
         flightSuretyData.buy.value(msg.value)(
             airline,
             flight,

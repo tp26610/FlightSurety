@@ -267,7 +267,47 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(result, true, 'The insurance should be purchased');
   });
 
-  xit('(insurance) cannot be paid for purchasing by user with 1.9 ether', async () => {});
+  it('(insurance) cannot be paid for purchasing by user with 1.9 ether', async () => {
+    // Given
+    const existingAirline = config.owner;
+    await givenAirlineFunded(existingAirline);
+
+    // Given a flight
+    const timeInSeconds = Date.parse('2012/09/29 23:34:43'); // 1348932883000
+    const flight = {
+      flight: 'ABC-123',
+      from: 'TPE',
+      to: 'TYO',
+      timestamp: timeInSeconds,
+    };
+    await config.flightSuretyApp.registerFlight(
+      flight.flight,
+      flight.from,
+      flight.to,
+      flight.timestamp,
+      { from: existingAirline }
+    );
+
+    // Given a passenger
+    const passenger = accounts[11];
+
+    // When
+    let isReverted = false;
+    try {
+      await config.flightSuretyApp.buyInsurance(
+        existingAirline,
+        flight.flight,
+        flight.timestamp,
+        { from: passenger, value: web3.utils.toWei('1.9', 'ether') }
+      );
+    } catch (e) {
+      console.error(e);
+      isReverted = true;
+    }
+
+    // Then
+    assert.equal(isReverted, true, 'User cannot buy insurance above insurance limit');
+  });
 
   xit('(insurance) cannot be paid for purchasing if the airline is not operational', async () => {});
 });
