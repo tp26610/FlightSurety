@@ -142,8 +142,13 @@ contract FlightSuretyApp {
             msg.value <= 1 ether,
             "User cannot buy insurance above 1 ether"
         );
-        bool isAirlineOperational = flightSuretyData.isAirlineOperational(airline);
-        require(isAirlineOperational, "User cannot buy insurance of the non-operational airline.");
+        bool isAirlineOperational = flightSuretyData.isAirlineOperational(
+            airline
+        );
+        require(
+            isAirlineOperational,
+            "User cannot buy insurance of the non-operational airline."
+        );
         flightSuretyData.buy.value(msg.value)(
             airline,
             flight,
@@ -159,10 +164,17 @@ contract FlightSuretyApp {
      */
     function processFlightStatus(
         address airline,
-        string memory flight,
+        string flight,
         uint256 timestamp,
         uint8 statusCode
-    ) internal pure {}
+    ) internal {
+        flightSuretyData.processFlightStatus(
+            airline,
+            flight,
+            timestamp,
+            statusCode
+        );
+    }
 
     // Generate a request for oracles to fetch flight information
     function fetchFlightStatus(
@@ -383,4 +395,11 @@ contract FlightSuretyData {
         address passenger,
         uint256 amount
     ) external payable;
+
+    function processFlightStatus(
+        address airline,
+        string flight,
+        uint256 timestamp,
+        uint8 statusCode
+    ) external;
 }

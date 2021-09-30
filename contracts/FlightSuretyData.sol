@@ -248,11 +248,7 @@ contract FlightSuretyData {
         require(flights[flightKey].isRegistered, "Flight is not registered");
 
         insurancesPerFlight[flightKey].push(
-            Insurance({
-                passenger: passenger,
-                amount: amount,
-                isCredited: false
-            })
+            Insurance({passenger: passenger, amount: amount, isCredited: false})
         );
     }
 
@@ -289,6 +285,47 @@ contract FlightSuretyData {
         uint256 timestamp
     ) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(airline, flight, timestamp));
+    }
+
+    function processFlightStatus(
+        address airline,
+        string flight,
+        uint256 timestamp,
+        uint8 statusCode
+    ) external {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        if (flights[flightKey].statusCode == STATUS_CODE_UNKNOWN) {
+            flights[flightKey].statusCode = statusCode;
+            if (statusCode == STATUS_CODE_LATE_AIRLINE) {
+                creditInsurees(airline, flight, timestamp);
+            }
+        }
+    }
+
+    function creditInsurees(
+        address airline,
+        string flight,
+        uint256 timestamp
+    ) internal {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+
+        for (uint256 i = 0; i < insurancesPerFlight[flightKey].length; i++) {
+            Insurance memory insurance = insurancesPerFlight[flightKey][i];
+
+            if (!insurance.isCredited) {
+                insurance.isCredited = true;
+                uint256 amount = insurance.amount.mul(15).div(10);
+                pendingPayments[insurance.passenger] += amount;
+            }
+        }
+    }
+
+    function getCreditedAmount(address passenger)
+        external
+        view
+        returns (uint256)
+    {
+        return pendingPayments[passenger];
     }
 
     function authorizeCaller(address caller) external requireContractOwner {
