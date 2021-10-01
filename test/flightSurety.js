@@ -406,4 +406,61 @@ contract('Flight Surety Tests', async (accounts) => {
       'the credited amount is wrong'
     );
   });
+
+  it('(passenger) withdarws credited amount', async () => {
+    // Given created amount
+    // Given
+    const existingAirline = config.owner;
+    await givenAirlineFunded(existingAirline);
+    // Given a flight
+    const timeInSeconds = Date.parse('2012/09/29 23:34:43'); // 1348932883000
+    const flight = {
+      flight: 'ABC-123',
+      from: 'TPE',
+      to: 'TYO',
+      timestamp: timeInSeconds,
+    };
+    await config.flightSuretyApp.registerFlight(
+      flight.flight,
+      flight.from,
+      flight.to,
+      flight.timestamp,
+      { from: existingAirline }
+    );
+    // Given a passenger who buys insurance.
+    const passenger = accounts[11];
+    await config.flightSuretyApp.buyInsurance(
+      existingAirline,
+      flight.flight,
+      flight.timestamp,
+      { from: passenger, value: web3.utils.toWei('1', 'ether') }
+    );
+    // Given the flight is delayed
+    const delayedStatusCode = 20; // STATUS_CODE_LATE_AIRLINE
+    await config.flightSuretyData.processFlightStatus(
+      existingAirline,
+      flight.flight,
+      flight.timestamp,
+      delayedStatusCode,
+      { from: existingAirline }
+    );
+
+    // When passenger withdraws amount
+    const beforeBalance = await web3.eth.getBalance(passenger);
+    await config.flightSuretyApp.withdrawCreditedAmount({
+      from: passenger,
+      gasPrice: 0,
+    });
+    const afterBalance = await web3.eth.getBalance(passenger);
+
+    // Then user got the credited amount.
+    const beforeBalanceBN = web3.utils.toBN(beforeBalance);
+    const afterBalanceBN = web3.utils.toBN(afterBalance);
+    const balanceDiffBN = afterBalanceBN.sub(beforeBalanceBN);
+    assert.equal(
+      balanceDiffBN.toString(),
+      web3.utils.toWei('1.5', 'ether'),
+      'The passenger does not receive the credited amount'
+    );
+  });
 });

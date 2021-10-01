@@ -158,6 +158,10 @@ contract FlightSuretyApp {
         );
     }
 
+    function withdrawCreditedAmount() external {
+        flightSuretyData.pay(msg.sender);
+    }
+
     /**
      * @dev Called after oracle has updated flight status
      *
@@ -395,6 +399,8 @@ contract FlightSuretyData {
         address passenger,
         uint256 amount
     ) external payable;
+
+    function pay(address passenger) external;
 
     function processFlightStatus(
         address airline,
