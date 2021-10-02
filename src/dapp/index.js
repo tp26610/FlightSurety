@@ -2,26 +2,55 @@ import DOM from './dom';
 import Contract from './contract';
 import './flightsurety.css';
 
-(async () => {
-  let result = null;
+const contract = new Contract('localhost');
 
-  let contract = new Contract('localhost', () => {
-    // Read transaction
-    contract.isOperational((error, result) => {
-      console.log(error, result);
-      display(
-        'display-wrapper-fetch-flight-status',
-        'Operational Status',
-        'Check if contract is operational',
-        [{ label: 'Operational Status', error: error, value: result }]
-      );
-    });
+function initializeContract() {
+  try {
+    contract.initialize();
+  } catch (error) {
+    console.log('contract.initialize error=', error);
+  }
+}
 
-    // User-submitted transaction
-    DOM.elid('submit-oracle').addEventListener('click', () => {
-      let flight = DOM.elid('flight-number').value;
-      // Write transaction
-      contract.fetchFlightStatus(flight, (error, result) => {
+async function displayOperationalStatus() {
+  try {
+    const result = await contract.isOperational();
+    display(
+      'display-wrapper-fetch-flight-status',
+      'Operational Status',
+      'Check if contract is operational',
+      [{ label: 'Operational Status', value: result }]
+    );
+  } catch (error) {
+    console.log('contract.isOperational error=', error);
+    display(
+      'display-wrapper-fetch-flight-status',
+      'Operational Status',
+      'Check if contract is operational',
+      [{ label: 'Operational Status', error: error }]
+    );
+  }
+}
+
+function setupFetchFlightStatusButton() {
+  DOM.elid('submit-oracle').addEventListener('click', () => {
+    let flight = DOM.elid('flight-number').value;
+    contract
+      .fetchFlightStatus(flight)
+      .then((result) => {
+        display(
+          'display-wrapper-fetch-flight-status',
+          'Oracles',
+          'Trigger oracles',
+          [
+            {
+              label: 'Fetch Flight Status',
+              value: result.flight + ' ' + result.timestamp,
+            },
+          ]
+        );
+      })
+      .catch((error) => {
         display(
           'display-wrapper-fetch-flight-status',
           'Oracles',
@@ -30,13 +59,19 @@ import './flightsurety.css';
             {
               label: 'Fetch Flight Status',
               error: error,
-              value: result.flight + ' ' + result.timestamp,
             },
           ]
         );
       });
-    });
   });
+}
+
+(async () => {
+  let result = null;
+
+  initializeContract();
+  displayOperationalStatus(); // async
+  setupFetchFlightStatusButton();
 })();
 
 // display('display-wrapper-fetch-flight-status', 'test title', 'test description', [{label: 'test label', value: 'test value'}]);
