@@ -13,55 +13,41 @@ function initializeContract() {
 }
 
 async function displayOperationalStatus() {
+  const viewId = 'display-wrapper-fetch-flight-status';
+  const title = 'Operational Status';
+  const description = 'Check if contract is operational';
   try {
     const result = await contract.isOperational();
-    display(
-      'display-wrapper-fetch-flight-status',
-      'Operational Status',
-      'Check if contract is operational',
-      [{ label: 'Operational Status', value: result }]
-    );
+    display(viewId, title, description, [{ label: title, value: result }]);
   } catch (error) {
-    console.log('contract.isOperational error=', error);
-    display(
-      'display-wrapper-fetch-flight-status',
-      'Operational Status',
-      'Check if contract is operational',
-      [{ label: 'Operational Status', error: error }]
-    );
+    display(viewId, title, description, [{ label: title, error: error }]);
   }
 }
 
 function setupFetchFlightStatusButton() {
+  const viewId = 'display-wrapper-fetch-flight-status';
+  const title = 'Oracles';
+  const description = 'Trigger oracles';
+  const resultLabel = 'Fetch Flight Status';
   DOM.elid('submit-oracle').addEventListener('click', () => {
     let flight = DOM.elid('flight-number').value;
     contract
       .fetchFlightStatus(flight)
       .then((result) => {
-        display(
-          'display-wrapper-fetch-flight-status',
-          'Oracles',
-          'Trigger oracles',
-          [
-            {
-              label: 'Fetch Flight Status',
-              value: result.flight + ' ' + result.timestamp,
-            },
-          ]
-        );
+        display(viewId, title, description, [
+          {
+            label: resultLabel,
+            value: result.flight + ' ' + result.timestamp,
+          },
+        ]);
       })
       .catch((error) => {
-        display(
-          'display-wrapper-fetch-flight-status',
-          'Oracles',
-          'Trigger oracles',
-          [
-            {
-              label: 'Fetch Flight Status',
-              error: error,
-            },
-          ]
-        );
+        display(viewId, title, description, [
+          {
+            label: resultLabel,
+            error: error,
+          },
+        ]);
       });
   });
 }
