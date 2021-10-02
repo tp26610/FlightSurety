@@ -3,12 +3,36 @@ import Contract from './contract';
 import './flightsurety.css';
 
 const contract = new Contract('localhost');
+window.contract = contract;
 
-function initializeContract() {
+async function initializeContract() {
   try {
-    contract.initialize();
+    await contract.initialize();
   } catch (error) {
     console.log('contract.initialize error=', error);
+  }
+}
+
+function displayAppDataSet() {
+  const viewId = 'display-wrapper-app-data-set';
+  const title = 'App data set';
+  const description = 'Display data set in App';
+  try {
+    const result = [{ label: 'Owner', value: contract.owner }];
+
+    // add airlines to result
+    contract.airlines.forEach((airline, index) => {
+      result.push({ label: `Airline ${index}`, value: airline });
+    });
+
+    // add passengers to result
+    contract.passengers.forEach((passenger, index) => {
+      result.push({ label: `Passenger ${index}`, value: passenger });
+    });
+
+    display(viewId, title, description, result);
+  } catch (error) {
+    display(viewId, title, description, [{ label: title, error: error }]);
   }
 }
 
@@ -55,8 +79,9 @@ function setupFetchFlightStatusButton() {
 (async () => {
   let result = null;
 
-  initializeContract();
-  displayOperationalStatus(); // async
+  await initializeContract();
+  displayAppDataSet();
+  await displayOperationalStatus();
   setupFetchFlightStatusButton();
 })();
 
