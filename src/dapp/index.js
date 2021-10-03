@@ -39,6 +39,14 @@ async function displayAppDataSet() {
       result.push({ label: `Passenger ${index}`, value: passenger });
     });
 
+    // add flights to result
+    contract.flights.forEach((flight, index) => {
+      result.push({
+        label: `Flight ${index}`,
+        value: JSON.stringify(flight, null, 2),
+      });
+    });
+
     display(viewId, title, description, result);
   } catch (error) {
     display(viewId, title, description, [{ label: title, error: error }]);

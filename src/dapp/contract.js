@@ -3,6 +3,39 @@ import Config from './config.json';
 import Web3 from 'web3';
 
 export default class Contract {
+  flights = [
+    {
+      flight: 'ABC0123',
+      from: 'TPE',
+      to: 'TYO',
+      timestamp: Date.parse('2012/09/29 23:34:43'),
+    },
+    {
+      flight: 'DEF4567',
+      from: 'SIN',
+      to: 'MTN',
+      timestamp: Date.parse('2012/09/30 23:34:43'),
+    },
+    {
+      flight: 'GHI8901',
+      from: 'KUL',
+      to: 'HNL',
+      timestamp: Date.parse('2012/10/01 23:34:43'),
+    },
+    {
+      flight: 'LMN2345',
+      from: 'PEN',
+      to: 'YVR',
+      timestamp: Date.parse('2012/10/02 23:34:43'),
+    },
+    {
+      flight: 'OPE6789',
+      from: 'IPH',
+      to: 'YYZ',
+      timestamp: Date.parse('2012/10/03 23:34:43'),
+    },
+  ];
+
   constructor(network) {
     let config = Config[network];
     this.web3 = new Web3(new Web3.providers.HttpProvider(config.url));
