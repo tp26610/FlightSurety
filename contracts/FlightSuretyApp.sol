@@ -110,7 +110,11 @@ contract FlightSuretyApp {
         return (false, voteCount);
     }
 
-    function fundAirline(address airline) external payable {
+    function fundAirline(address airline)
+        external
+        payable
+        requireIsOperational
+    {
         flightSuretyData.fund.value(msg.value)(airline);
     }
 
@@ -131,7 +135,7 @@ contract FlightSuretyApp {
         string from,
         string to,
         uint256 timestamp
-    ) external {
+    ) external requireIsOperational {
         flightSuretyData.registerFlight(
             msg.sender,
             flight,
@@ -145,7 +149,7 @@ contract FlightSuretyApp {
         address airline,
         string flight,
         uint256 timestamp
-    ) external payable {
+    ) external payable requireIsOperational {
         require(
             msg.value <= 1 ether,
             "User cannot buy insurance above 1 ether"
@@ -164,7 +168,7 @@ contract FlightSuretyApp {
         );
     }
 
-    function withdrawCreditedAmount() external {
+    function withdrawCreditedAmount() external requireIsOperational {
         flightSuretyData.pay(msg.sender);
     }
 
@@ -191,7 +195,7 @@ contract FlightSuretyApp {
         address airline,
         string flight,
         uint256 timestamp
-    ) external {
+    ) external requireIsOperational {
         uint8 index = getRandomIndex(msg.sender);
 
         // Generate a unique key for storing the request
@@ -264,7 +268,7 @@ contract FlightSuretyApp {
     );
 
     // Register an oracle with the contract
-    function registerOracle() external payable {
+    function registerOracle() external payable requireIsOperational {
         // Require registration fee
         require(msg.value >= REGISTRATION_FEE, "Registration fee is required");
 
@@ -292,7 +296,7 @@ contract FlightSuretyApp {
         string flight,
         uint256 timestamp,
         uint8 statusCode
-    ) external {
+    ) external requireIsOperational {
         require(
             (oracles[msg.sender].indexes[0] == index) ||
                 (oracles[msg.sender].indexes[1] == index) ||
