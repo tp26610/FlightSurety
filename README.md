@@ -120,3 +120,12 @@ To view dapp:
     - Update flight status requests from client Dapp result in OracleRequest event emitted by Smart Contract that is captured by server (displays on console and handled in code)
 4. Oracle Functionality
     - Server will loop through all registered oracles, identify those oracles for which the OracleRequest event applies, and respond by calling into FlightSuretyApp contract with random status code of Unknown (0), On Time (10) or Late Airline (20), Late Weather (30), Late Technical (40), or Late Other (50)
+
+## Screenshots
+
+The DApp will show you all data information.
+![dapp-screenshot-1](images/dapp-screenshot-1.png)
+
+Passenger can buy insurance after entering the flight number and click `Buy Insurance With 1ETH` button.
+![dapp-screenshot-1](images/dapp-screenshot-2.png)
+
