@@ -2,37 +2,41 @@ import FlightSuretyApp from '../../build/contracts/FlightSuretyApp.json';
 import Config from './config.json';
 import Web3 from 'web3';
 
+function getDateTimeInSeconds(dateString) {
+  return Math.floor(Date.parse(dateString) / 1000);
+}
+
 export default class Contract {
   flights = [
     {
       flight: 'ABC0123',
       from: 'TPE',
       to: 'TYO',
-      timestamp: Date.parse('2012/09/29 23:34:43'),
+      timestamp: getDateTimeInSeconds('2012/09/28 23:34:43'),
     },
     {
       flight: 'DEF4567',
       from: 'SIN',
       to: 'MTN',
-      timestamp: Date.parse('2012/09/30 23:34:43'),
+      timestamp: getDateTimeInSeconds('2012/09/29 23:34:43'),
     },
     {
       flight: 'GHI8901',
       from: 'KUL',
       to: 'HNL',
-      timestamp: Date.parse('2012/10/01 23:34:43'),
+      timestamp: getDateTimeInSeconds('2012/09/30 23:34:43'),
     },
     {
       flight: 'LMN2345',
       from: 'PEN',
       to: 'YVR',
-      timestamp: Date.parse('2012/10/02 23:34:43'),
+      timestamp: getDateTimeInSeconds('2012/10/01 23:34:43'),
     },
     {
       flight: 'OPE6789',
       from: 'IPH',
       to: 'YYZ',
-      timestamp: Date.parse('2012/10/03 23:34:43'),
+      timestamp: getDateTimeInSeconds('2012/10/02 23:34:43'),
     },
   ];
 
@@ -74,6 +78,35 @@ export default class Contract {
       'Contract.initialize >> passengers.length=',
       this.passengers.length
     );
+
+    await this._registerFlightsToOwnerAirline();
+  }
+
+  async _registerFlightsToOwnerAirline() {
+    for (let i = 0; i < this.flights.length; i++) {
+      const flight = this.flights[i];
+      try {
+        await this.flightSuretyApp.methods
+          .registerFlight(
+            flight.flight,
+            flight.from,
+            flight.to,
+            flight.timestamp
+          )
+          .send({
+            from: this.owner,
+            gas: 6721975, // cause a contract reverted if gas not provided. Maybe the default gas is too low
+          });
+        console.log(
+          `_registerFlightsToOwnerAirline >> success i=${i} flightNumber=${flight.flight}`
+        );
+      } catch (error) {
+        console.log(
+          `_registerFlightsToOwnerAirline >> failed i=${i} flightNumber=${flight.flight} error=`,
+          error
+        );
+      }
+    }
   }
 
   async isOperational() {

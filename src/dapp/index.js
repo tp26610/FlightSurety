@@ -42,7 +42,7 @@ async function displayAppDataSet() {
     // add flights to result
     contract.flights.forEach((flight, index) => {
       result.push({
-        label: `Flight ${index}`,
+        label: `Owner Flight ${index}`,
         value: JSON.stringify(flight, null, 2),
       });
     });
