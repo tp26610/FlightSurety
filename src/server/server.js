@@ -177,7 +177,7 @@ flightSuretyApp.events.OracleRequest(
           .send({ from: oracle.address }, (error, result) => {
             if (error) {
               console.log(
-                'flightSuretyApp.events.OracleRequest >> submit resposne failed',
+                `flightSuretyApp.events.OracleRequest >> submit resposne failed for oracleArrayIndex=${i} error=`,
                 error
               );
               return;
@@ -191,6 +191,29 @@ flightSuretyApp.events.OracleRequest(
     }
   }
 );
+
+flightSuretyApp.events.FlightStatusInfo((error, event) => {
+  if (error) {
+    console.log('flightSuretyApp.events.FlightStatusInfo >> error=', error);
+    return;
+  }
+  console.log('flightSuretyApp.events.FlightStatusInfo >> event=', event);
+  const airline = event.returnValues.airline;
+  const flight = event.returnValues.flight;
+  const timestamp = event.returnValues.timestamp;
+  const status = event.returnValues.status;
+  const flightObj = {
+    airline,
+    flight,
+    timestamp,
+    status,
+  };
+
+  console.log(
+    'flightSuretyApp.events.FlightStatusInfo >> resultFlight=',
+    JSON.stringify(flightObj, null, 2)
+  );
+});
 
 const app = express();
 app.get('/api', (req, res) => {
