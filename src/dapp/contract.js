@@ -150,4 +150,15 @@ export default class Contract {
       .send({ from: airline, value: tenEtherInWei });
     return result;
   }
+
+  _findFlight(flightNumber) {
+    return this.flights.find((flight) => flight.flight === flightNumber);
+  }
+
+  async buyInsurance(flightNumber) {
+    const flight = this._findFlight(flightNumber);
+    await this.flightSuretyApp.methods
+      .buyInsurance(this.owner, flight.flight, flight.timestamp)
+      .send({ from: this.passengers[0] });
+  }
 }

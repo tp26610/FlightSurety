@@ -111,14 +111,44 @@ function setupFetchFlightStatusButton() {
   });
 }
 
+function setupBuyInsuranceButton() {
+  const viewId = 'display-wrapper-fetch-flight-status';
+  const title = 'Buy Insurance Result';
+  const description = '';
+  const resultLabel = 'Is Insured';
+  DOM.elid('buy-insurance').addEventListener('click', () => {
+    let flight = DOM.elid('flight-number').value;
+    contract
+      .buyInsurance(flight)
+      .then((_) => {
+        display(viewId, title, description, [
+          {
+            label: resultLabel,
+            value: 'success for flight ' + flight,
+          },
+        ]);
+      })
+      .catch((error) => {
+        display(viewId, title, description, [
+          {
+            label: resultLabel,
+            error: error,
+          },
+        ]);
+      });
+  });
+}
+
 (async () => {
   let result = null;
 
   await initializeContract();
   await displayAppDataSet();
   await displayOperationalStatus();
-  setupFetchFlightStatusButton();
+
   setupFundOwnerAirlineButton();
+  setupFetchFlightStatusButton();
+  setupBuyInsuranceButton();
 })();
 
 // display('display-wrapper-fetch-flight-status', 'test title', 'test description', [{label: 'test label', value: 'test value'}]);

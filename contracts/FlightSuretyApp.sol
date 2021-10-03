@@ -150,11 +150,9 @@ contract FlightSuretyApp {
             msg.value <= 1 ether,
             "User cannot buy insurance above 1 ether"
         );
-        bool isAirlineOperational = flightSuretyData.isAirlineOperational(
-            airline
-        );
+        bool isAirlineFunded = flightSuretyData.isAirlineOperational(airline);
         require(
-            isAirlineOperational,
+            isAirlineFunded,
             "User cannot buy insurance of the non-operational airline."
         );
         flightSuretyData.buy.value(msg.value)(
