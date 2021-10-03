@@ -123,9 +123,10 @@ export default class Contract {
       flight: flight,
       timestamp: Math.floor(Date.now() / 1000),
     };
-    return await self.flightSuretyApp.methods
+    await self.flightSuretyApp.methods
       .fetchFlightStatus(payload.airline, payload.flight, payload.timestamp)
       .send({ from: self.owner });
+    return payload;
   }
 
   async isAirlineOperational(account) {
