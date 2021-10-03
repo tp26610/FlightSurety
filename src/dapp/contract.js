@@ -61,4 +61,27 @@ export default class Contract {
       .fetchFlightStatus(payload.airline, payload.flight, payload.timestamp)
       .send({ from: self.owner });
   }
+
+  async isAirlineOperational(account) {
+    console.log(
+      'isAirlineOperational >> account=',
+      account,
+      ' owner=',
+      this.owner
+    );
+    const result = await this.flightSuretyApp.methods
+      .isAirlineOperational(account)
+      .call({ from: this.owner });
+    console.log('isAirlineOperational >> result=', result);
+    return result;
+  }
+
+  async fundAirline(airline) {
+    console.log('fundAirline >> airline=', airline);
+    const tenEtherInWei = this.web3.utils.toWei('10', 'ether');
+    const result = await this.flightSuretyApp.methods
+      .fundAirline(airline)
+      .send({ from: airline, value: tenEtherInWei });
+    return result;
+  }
 }

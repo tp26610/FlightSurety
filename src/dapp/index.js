@@ -13,12 +13,21 @@ async function initializeContract() {
   }
 }
 
-function displayAppDataSet() {
+async function displayAppDataSet() {
   const viewId = 'display-wrapper-app-data-set';
   const title = 'App data set';
   const description = 'Display data set in App';
   try {
     const result = [{ label: 'Owner', value: contract.owner }];
+
+    // show owner airline operational
+    const isOwnerAirlineOperational = await contract.isAirlineOperational(
+      contract.owner
+    );
+    result.push({
+      label: 'Owner Airline Operational',
+      value: isOwnerAirlineOperational,
+    });
 
     // add airlines to result
     contract.airlines.forEach((airline, index) => {
@@ -46,6 +55,24 @@ async function displayOperationalStatus() {
   } catch (error) {
     display(viewId, title, description, [{ label: title, error: error }]);
   }
+}
+
+function setupFundOwnerAirlineButton() {
+  const viewId = 'display-wrapper-app-data-set';
+  const title = 'Owner Airline Operational Status';
+  DOM.elid('fund-owner-airline').addEventListener('click', () => {
+    contract
+      .fundAirline(contract.owner)
+      .then((_) => contract.isAirlineOperational(contract.owner))
+      .then((isAirlineOperational) => {
+        display(viewId, title, '', [
+          { label: title, value: isAirlineOperational },
+        ]);
+      })
+      .catch((e) => {
+        display(viewId, title, '', [{ label: title, error: e }]);
+      });
+  });
 }
 
 function setupFetchFlightStatusButton() {
@@ -80,9 +107,10 @@ function setupFetchFlightStatusButton() {
   let result = null;
 
   await initializeContract();
-  displayAppDataSet();
+  await displayAppDataSet();
   await displayOperationalStatus();
   setupFetchFlightStatusButton();
+  setupFundOwnerAirlineButton();
 })();
 
 // display('display-wrapper-fetch-flight-status', 'test title', 'test description', [{label: 'test label', value: 'test value'}]);

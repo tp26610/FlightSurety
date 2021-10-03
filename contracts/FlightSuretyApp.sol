@@ -114,6 +114,14 @@ contract FlightSuretyApp {
         flightSuretyData.fund.value(msg.value)(airline);
     }
 
+    function isAirlineOperational(address airline)
+        external
+        view
+        returns (bool)
+    {
+        return flightSuretyData.isAirlineOperational(airline);
+    }
+
     /**
      * @dev Register a future flight for insuring.
      *
