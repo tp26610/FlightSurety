@@ -25,7 +25,7 @@ ganache-cli --defaultBalanceEther 10000 --accounts 50 --mnemonic "candy maple ca
 
 The result should look like following:
 
-![ganache-cli](images/ganache-cli.png)
+![ganache-cli](images/ganachi-cli.png)
 
 
 ## Run tests
